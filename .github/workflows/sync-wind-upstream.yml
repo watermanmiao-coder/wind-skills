@@ -1,0 +1,84 @@
+name: Sync Wind upstream safely
+
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wind-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge upstream and preserve local routing guards
+        shell: bash
+        env:
+          UPSTREAM_URL: https://github.com/Wind-Information-Co-Ltd/wind-skills.git
+          UPSTREAM_BRANCH: main
+        run: |
+          set -euo pipefail
+
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch --no-tags upstream "$UPSTREAM_BRANCH"
+
+          before="$(git rev-parse HEAD)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git merge --no-edit "upstream/$UPSTREAM_BRANCH"; then
+            git merge --abort || true
+            echo "::error::Wind upstream merge conflicted; the fork was left unchanged."
+            exit 1
+          fi
+
+          skill="skills/wind-mcp-skill/SKILL.md"
+          updater="skills/wind-mcp-skill/scripts/update-check.mjs"
+
+          require_text() {
+            local needle="$1"
+            local file="$2"
+            if ! grep -Fq "$needle" "$file"; then
+              echo "::error file=$file::Required local guard is missing: $needle"
+              exit 1
+            fi
+          }
+
+          require_absent() {
+            local needle="$1"
+            local file="$2"
+            if grep -Fq "$needle" "$file"; then
+              echo "::error file=$file::Disallowed updater source returned: $needle"
+              exit 1
+            fi
+          }
+
+          require_text "仅在用户明确指定 Wind" "$skill"
+          require_text "明确指定 Tushare/iFind" "$skill"
+          require_text "纯策略逻辑解释" "$skill"
+          require_text "本 Skill 只负责通过 Wind 回答金融数据事实" "$skill"
+          require_text "'watermanmiao-coder/wind-skills'" "$updater"
+          require_text "canonicalInstallSucceeded" "$updater"
+          require_absent "'Wind-Information-Co-Ltd/wind-skills'" "$updater"
+
+          node --check "$updater"
+          node --check "skills/wind-mcp-skill/scripts/cli.mjs"
+          git diff --check "$before"..HEAD
+
+          if git diff --quiet origin/main..HEAD; then
+            echo "Wind fork is already current."
+            exit 0
+          fi
+
+          git push origin HEAD:main
