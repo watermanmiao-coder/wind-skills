@@ -39,8 +39,7 @@ const SKILL_SCRIPTS_DIR = join(SKILL_DIR, 'scripts');
 const LOCK_FILE = join(SKILL_SCRIPTS_DIR, 'update.lock');
 const SKILL_NAME = basename(SKILL_DIR);
 const DEFAULT_SOURCES = [
-  'Wind-Information-Co-Ltd/wind-skills',
-  'git@gitee.com:wind_info/wind-skills.git',
+  'watermanmiao-coder/wind-skills',
 ];
 const LOCK_STALE_MS = 30 * 60 * 1000;
 const QUIET_MS = 10 * 1000;
