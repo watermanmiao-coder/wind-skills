@@ -407,15 +407,19 @@ function runSkillCommand(command, method) {
     windowsHide: true,
   });
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+  const canonicalInstallSucceeded =
+    /~\/\.agents\/skills\/wind-mcp-skill/i.test(output) &&
+    /✓\s+wind-mcp-skill(?:\s|\()/i.test(output);
   const failedByOutput =
-    /failed to (update|add|install)|No installed skills found matching/i.test(output);
+    /failed to (update|add|install)|No installed skills found matching/i.test(output) &&
+    !canonicalInstallSucceeded;
 
   return {
     command,
     method,
     result,
     output,
-    ok: result.status === 0 && !failedByOutput,
+    ok: (result.status === 0 || canonicalInstallSucceeded) && !failedByOutput,
     error: result.error ?
       String(result.error.message || result.error) :
       failedByOutput ?
