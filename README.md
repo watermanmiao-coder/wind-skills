@@ -19,7 +19,6 @@
 | Skill                                                     | 能力域                                                                                                                              |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | [`wind-mcp-skill`](./skills/wind-mcp-skill)                   | **访问万得 Wind 金融数据**：股票（A 股/港股/美股行情与财务）、基金（行情与全维数据）、指数/板块、债券、公司公告与新闻、宏观经济指标 |
-| [`tushare-finance-skill`](./skills/tushare-finance-skill)     | **访问 Tushare Pro 金融数据**：A 股、港股、美股、基金、期货、债券、财务报表与宏观经济指标                                           |
 
 ### Agent 类
 
@@ -212,7 +211,6 @@ wind-skills/
 └── skills/                         ← 所有 skill 直接平铺，对齐 npx skills 协议
     ├── wind-find-finance-skill/    ← 入口（无 cli.mjs，纯 SKILL.md + references）
     ├── wind-mcp-skill/             ← 万得 Wind 金融数据访问
-    ├── tushare-finance-skill/      ← Tushare Pro 金融数据
     ├── wind-alice/                 ← Alice 专业金融分析 Agent
     ├── a-share-primary-theme-identification/
     ├── backtest-expert/
