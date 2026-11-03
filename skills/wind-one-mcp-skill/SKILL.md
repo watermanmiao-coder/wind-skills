@@ -83,4 +83,3 @@ node scripts/cli.mjs update --force
 ```
 
 命令等待检查和替换完成，输出更新结果；失败返回具体错误和非零退出码。`--force` 绕过当天成功记录、失败退避和自动更新开关。`update` 不带 `--force` 时沿用上述检查频率。
-
